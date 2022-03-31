@@ -295,7 +295,7 @@ public class Filo_RMGC_Control : MonoBehaviour
 
         // shift position
         tl_pos = transform.position;
-        del_pos = tl_vel * d_t / 16384;
+        del_pos = tl_vel * d_t;
         tl_pos.z += del_pos;
 
         // update drawing
@@ -307,7 +307,7 @@ public class Filo_RMGC_Control : MonoBehaviour
 
         // shift position
         tr_pos = trolley.transform.position;
-        del_pos = tr_vel * d_t / 16384;
+        del_pos = tr_vel * d_t;
         tr_pos.x += del_pos;
 
         // update drawing
