@@ -6,6 +6,9 @@ using S7.Net;
 
 public class Filo_RMGC_Control : MonoBehaviour
 {
+    // Local command
+    bool cmd_local_ctrl;
+
     // PLC
     Plc plc;
     string ip;
@@ -58,6 +61,9 @@ public class Filo_RMGC_Control : MonoBehaviour
         // random seed
         Random.InitState(42);
 
+        // local control
+        cmd_local_ctrl = false;
+
         // plc preset
         ip = "192.168.0.212";
         rack = 0;
@@ -90,10 +96,14 @@ public class Filo_RMGC_Control : MonoBehaviour
         arr_sensor_bytes = new byte[arr_sensor_float.Length * 4];
 
         //////////////////////////////////////////////////// Preset
-        
-        // Connect PLC
-        //plc = new Plc(CpuType.S71500, ip, rack, slot);
-        //plc.Open();
+
+        // local control cmd
+        if (cmd_local_ctrl == false)
+        {
+            // Connect PLC
+            plc = new Plc(CpuType.S71500, ip, rack, slot);
+            plc.Open();
+        }
 
         // load trolley instance
         trolley = GameObject.Find("Trolley");
@@ -208,11 +218,14 @@ public class Filo_RMGC_Control : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        // LiDAR data to PLC
-        //Unity_to_PLC();
+        if (cmd_local_ctrl == false)
+        {
+            // LiDAR data to PLC
+            Unity_to_PLC();
 
-        // Read PLC data
-        //PLC_to_Unity();
+            // Read PLC data
+            PLC_to_Unity();
+        }
 
         //Debug.Log(Time.deltaTime); 
     }

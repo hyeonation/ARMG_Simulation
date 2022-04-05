@@ -1,5 +1,5 @@
 sceneSetups:
-- path: Assets/Scenes/RMGC_Modeling_using_Filo.unity
+- path: Assets/Scenes/No_ALS.unity
   isLoaded: 1
   isActive: 1
   isSubScene: 0
