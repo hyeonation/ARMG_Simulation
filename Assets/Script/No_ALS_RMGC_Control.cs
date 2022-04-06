@@ -58,6 +58,12 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     float[] arr_sensor_float;
     byte[] arr_sensor_bytes;
 
+    // RFID
+    public GameObject RFID_Tag, TL_Calib_Target;
+    GameObject[] arr_RFID_Tag, arr_TL_Calib_Target;
+    Vector3 pos_RFID_init, pos_RFID_tmp;
+
+
     // Start is called before the first frame update
     // Setting objects and init values
     void Start()
@@ -102,8 +108,11 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         arr_sensor_float = new float[10];
         arr_sensor_bytes = new byte[arr_sensor_float.Length * 4];
 
+        // RFID
+        pos_RFID_init = new Vector3(16.62f, 0, 0);
+
         //////////////////////////////////////////////////// Preset
-        
+
         // local control cmd
         if (cmd_local_ctrl == false)
         {
@@ -142,6 +151,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             i++;
         }
 
+        //// Container
         // Make number
         num_container = 0;
 
@@ -170,6 +180,9 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             
             else
                 arr_container[j] = Instantiate(Container_green);
+
+            // set parent
+            arr_container[j].transform.SetParent(GameObject.Find("Container").transform);
         }
 
         // Make bay, row position
@@ -232,6 +245,42 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
         twist_lock = spreader_down.GetComponent<Twist_Lock_SPSS>();
 
+        //// RFID
+        // Make instance
+        arr_TL_Calib_Target = new GameObject[num_bay];
+        arr_RFID_Tag = new GameObject[num_bay];
+        for (int j = 0; j < num_bay; j++)
+        {
+            //// TL_Calib_Target
+            // Make instance
+            arr_TL_Calib_Target[j] = Instantiate(TL_Calib_Target);
+
+            // set name
+            arr_TL_Calib_Target[j].name = "TL_Calib_Target" + System.Convert.ToString(j+1);
+
+            // set parent
+            arr_TL_Calib_Target[j].transform.SetParent(GameObject.Find("TL_Calib_Target").transform);
+
+            // set position
+            pos_RFID_tmp = -pos_RFID_init;
+            pos_RFID_tmp.z = arr_pos_bay[j] + (pos_container_size.z / 2);
+            arr_TL_Calib_Target[j].transform.position = pos_RFID_tmp;
+
+            //// RFID Tag
+            // Make instance
+            arr_RFID_Tag[j] = Instantiate(RFID_Tag);
+
+            // set name
+            arr_RFID_Tag[j].name = "RFID_Tag" + System.Convert.ToString(j + 1);
+
+            // set parent
+            arr_RFID_Tag[j].transform.SetParent(GameObject.Find("RFID_Tag").transform);
+
+            // set position
+            pos_RFID_tmp = 1*pos_RFID_init;
+            pos_RFID_tmp.z = arr_pos_bay[j] + (pos_container_size.z / 2);
+            arr_RFID_Tag[j].transform.position = pos_RFID_tmp;
+        }
     }
 
     // Update is called once per frame
