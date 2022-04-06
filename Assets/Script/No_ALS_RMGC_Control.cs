@@ -61,7 +61,11 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     // RFID
     public GameObject RFID_Tag, TL_Calib_Target;
     GameObject[] arr_RFID_Tag, arr_TL_Calib_Target;
+    GameObject RFID_SS;
     Vector3 pos_RFID_init, pos_RFID_tmp;
+    float val_RFID_tag, range_recogn_RFID, dist_to_RFID_Tag;
+    bool active_RFID;
+    int idx_RFID;
 
 
     // Start is called before the first frame update
@@ -110,6 +114,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
         // RFID
         pos_RFID_init = new Vector3(16.62f, 0, 0);
+        range_recogn_RFID = 3.0f;   // [m], radius
 
         //////////////////////////////////////////////////// Preset
 
@@ -280,12 +285,17 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             pos_RFID_tmp = 1*pos_RFID_init;
             pos_RFID_tmp.z = arr_pos_bay[j] + (pos_container_size.z / 2);
             arr_RFID_Tag[j].transform.position = pos_RFID_tmp;
+
+            // sea side RFID object
+            RFID_SS = GameObject.Find("RFID_Reader_SS");
         }
     }
 
     // Update is called once per frame
     void Update()
     {
+        RFID();
+
         // manual control
         if (cmd_local_ctrl)
         {
@@ -349,7 +359,6 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         i = 0;
         foreach (float data in arr_sensor_float)
         {
-            
             arr_bytes_temp = System.BitConverter.GetBytes(data);
             System.Array.Reverse(arr_bytes_temp);
 
@@ -487,9 +496,35 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             hinge.motor = motor;
 
         }
-
+        
         //// Twist lock
         twist_lock.tw_lock = tw_lock;
 
+    }
+
+    void RFID()
+    {
+        idx_RFID = twist_lock.out_idx(arr_pos_bay, tl_pos.z);
+        if (idx_RFID != -1)
+        {
+            pos_RFID_tmp = GameObject.Find("RFID_Tag" + System.Convert.ToString(idx_RFID + 1)).transform.position;
+            dist_to_RFID_Tag = (RFID_SS.transform.position - pos_RFID_tmp).magnitude;
+            
+            if (dist_to_RFID_Tag < range_recogn_RFID)
+            {
+                val_RFID_tag = pos_RFID_tmp.z;
+                active_RFID = true;
+            }
+
+            else
+            {
+                active_RFID = false;
+            }
+        }
+
+        else
+        {
+            active_RFID = false;
+        }
     }
 }

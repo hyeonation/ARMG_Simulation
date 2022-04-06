@@ -99,7 +99,7 @@ public class Twist_Lock_SPSS : MonoBehaviour
         
     }
 
-    int out_idx(float[] arr_pos, float target)
+    public int out_idx(float[] arr_pos, float target)
     {
         int idx = -1;
 
