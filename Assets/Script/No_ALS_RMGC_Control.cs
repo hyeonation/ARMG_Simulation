@@ -66,6 +66,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     float val_RFID_tag, range_recogn_RFID, dist_to_RFID_Tag;
     bool active_RFID;
     int idx_RFID;
+    Laser_distance Laser_SS_Front, Laser_SS_Rear, Laser_LS_Front, Laser_LS_Rear;
 
 
     // Start is called before the first frame update
@@ -288,6 +289,12 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
             // sea side RFID object
             RFID_SS = GameObject.Find("RFID_Reader_SS");
+
+            // RFID Laser
+            Laser_SS_Front = GameObject.Find("RFID_Reader_SS").transform.Find("Laser_Front").gameObject.GetComponent<Laser_distance>();
+            Laser_SS_Rear = GameObject.Find("RFID_Reader_SS").transform.Find("Laser_Rear").gameObject.GetComponent<Laser_distance>();
+            Laser_LS_Front = GameObject.Find("RFID_Reader_LS").transform.Find("Laser_Front").gameObject.GetComponent<Laser_distance>();
+            Laser_LS_Rear = GameObject.Find("RFID_Reader_LS").transform.Find("Laser_Rear").gameObject.GetComponent<Laser_distance>();
         }
     }
 
@@ -494,7 +501,6 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             var motor = hinge.motor;
             motor.targetVelocity = H_vel;
             hinge.motor = motor;
-
         }
         
         //// Twist lock
@@ -526,5 +532,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         {
             active_RFID = false;
         }
+
     }
+
 }

@@ -37,11 +37,11 @@ public class Laser_distance : MonoBehaviour
         
         if (bool_hit)
         {
-            Debug.DrawRay(point_src, dir * hit.distance, Color.blue, 0.1f);
+            Debug.DrawRay(point_src, dir * hit.distance, Color.blue, 0.01f);
         }
         else
         {
-            Debug.DrawRay(point_src, dir * maxDistance, Color.red, 0.1f);
+            Debug.DrawRay(point_src, dir * maxDistance, Color.red, 0.01f);
         }
         
     }
