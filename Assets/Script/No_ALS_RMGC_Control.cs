@@ -508,6 +508,19 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             hinge = pully.GetComponent<HingeJoint>();
             var motor = hinge.motor;
             motor.targetVelocity = H_vel;
+            
+            /*
+            // 원래 속도보다 천천히 회전시켜서 rope slack 효과 없앰
+            if (H_vel != 0)
+            {
+                motor.targetVelocity = H_vel / Mathf.Abs(H_vel) * (Mathf.Abs(H_vel) - 2);     
+            }
+            else
+            {
+                motor.targetVelocity = 0;
+            }
+            */
+
             hinge.motor = motor;
         }
 
@@ -516,15 +529,10 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         sp_pos = spreader.transform.position;
 
         // collision
-        if (twist_lock.state_coll)
+        if (twist_lock.state_coll || rope_slack)
         {
             sp_pos_y_imag -= del_pos;
-        }
-
-        // no collision
-        else
-        {
-            sp_pos_y_imag = sp_pos.y;
+            Debug.Log(sp_pos.y - sp_pos_y_imag);
         }
 
         // imag 값이 real 값보다 같거나 클 때만 update
@@ -533,6 +541,8 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         {
             sp_pos.y -= del_pos;
             spreader.transform.position = sp_pos;
+
+            sp_pos_y_imag = sp_pos.y;
             rope_slack = false;
         }
         else
