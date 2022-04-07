@@ -42,7 +42,9 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     GameObject[] arr_pully;
     string[] pully_name;
     HingeJoint hinge;
-    GameObject spreader_up, spreader_down;
+    GameObject spreader_up, spreader_down, spreader;
+    Vector3 sp_pos;
+    float sp_pos_y_imag, pully_diameter;
 
     // Container
     public GameObject Container_red, Container_green, Container_gray;
@@ -57,6 +59,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     // sensor data
     float[] arr_sensor_float;
     byte[] arr_sensor_bytes;
+    bool rope_slack;
 
     // RFID
     public GameObject RFID_Tag, TL_Calib_Target;
@@ -244,12 +247,15 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         // spreader
         spreader_up = GameObject.Find("Spreader_up");
         spreader_down = GameObject.Find("Spreader_down");
+        spreader = GameObject.Find("Spreader");
 
         Debug.Log(arr_pully[0].transform.position.y);
         Debug.Log(spreader_up.transform.position.y);
         Debug.Log(spreader_down.transform.position.y);
 
         twist_lock = spreader_down.GetComponent<Twist_Lock_SPSS>();
+
+        pully_diameter = arr_pully[0].transform.localScale.x * 2.0f;
 
         //// RFID
         // Make instance
@@ -493,6 +499,8 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         tr_pos.x += del_pos;
         trolley.transform.position = tr_pos;    // update drawing
 
+
+
         //// Hoist
         foreach (GameObject pully in arr_pully)
         {
@@ -502,10 +510,38 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             motor.targetVelocity = H_vel;
             hinge.motor = motor;
         }
+
+        //// spreader position
+        del_pos = (H_vel / 360) * (pully_diameter * (Mathf.PI)) * d_t;
+        sp_pos = spreader.transform.position;
+
+        // collision
+        if (twist_lock.state_coll)
+        {
+            sp_pos_y_imag -= del_pos;
+        }
+
+        // no collision
+        else
+        {
+            sp_pos_y_imag = sp_pos.y;
+        }
+
+        // imag 값이 real 값보다 같거나 클 때만 update
+        // rope slack 동시 구현
+        if (sp_pos.y <= sp_pos_y_imag)
+        {
+            sp_pos.y -= del_pos;
+            spreader.transform.position = sp_pos;
+            rope_slack = false;
+        }
+        else
+        {
+            rope_slack = true;
+        }
         
         //// Twist lock
         twist_lock.tw_lock = tw_lock;
-
     }
 
     void RFID()

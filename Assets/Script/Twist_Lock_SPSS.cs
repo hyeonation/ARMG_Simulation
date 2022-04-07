@@ -7,7 +7,7 @@ public class Twist_Lock_SPSS : MonoBehaviour
     public int tw_lock;
     int tw_lock_old;
     FixedJoint fixedJoint;
-    bool state_coll;
+    public bool state_coll;
 
     No_ALS_RMGC_Control RMGC;
     GameObject container;
@@ -77,10 +77,10 @@ public class Twist_Lock_SPSS : MonoBehaviour
                     Debug.Log(confirm_arr);
                 }
             }
-            
-            // update old value
-            tw_lock_old = tw_lock;
         }
+
+        // update old value
+        tw_lock_old = tw_lock;
     }
 
     private void OnCollisionEnter(Collision collision)
