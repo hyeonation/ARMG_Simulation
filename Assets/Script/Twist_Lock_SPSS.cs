@@ -13,12 +13,15 @@ public class Twist_Lock_SPSS : MonoBehaviour
     GameObject container;
     Vector3 pos_container;
     int idx_bay, idx_row;
+    bool lift_container;
 
     // Start is called before the first frame update
     void Start()
     {
         tw_lock_old = tw_lock;
         RMGC = GameObject.Find("RMGC").GetComponent<No_ALS_RMGC_Control>();
+
+        lift_container = false;
     }
 
     // Update is called once per frame
@@ -35,16 +38,24 @@ public class Twist_Lock_SPSS : MonoBehaviour
                 if (tw_lock == -1)
                 {
                     Debug.Log("Lock");
+                    container.transform.SetParent(transform);
+                    lift_container = true;
+
+                    /*
                     gameObject.AddComponent<FixedJoint>();
                     fixedJoint = GetComponent<FixedJoint>();
                     fixedJoint.connectedBody = container.GetComponent<Rigidbody>();
+                    */
                 }
 
                 // Unlock
                 else if (tw_lock == 1)
                 {
                     Debug.Log("Unlock");
-                    Destroy(fixedJoint);
+                    container.transform.SetParent(GameObject.Find("Container").transform);
+                    lift_container = false;
+
+                    //Destroy(fixedJoint);
                 }
 
                 //// update SPSS array
@@ -55,10 +66,14 @@ public class Twist_Lock_SPSS : MonoBehaviour
                 idx_bay = out_idx(RMGC.arr_pos_bay, pos_container.z);
                 idx_row = out_idx(RMGC.arr_pos_row, pos_container.x);
 
-                // 범위 안에 있을 때만
+                // 범위 안에 있을 때만 SPSS update
                 if ((idx_bay != -1) && (idx_row != -1))
                 {
                     RMGC.arr_num_container[idx_bay, idx_row] += tw_lock;
+                }
+                else
+                {
+                    Debug.Log("No apply stacking");
                 }
 
                 if (idx_bay != -1)
@@ -83,16 +98,21 @@ public class Twist_Lock_SPSS : MonoBehaviour
         tw_lock_old = tw_lock;
     }
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnTriggerEnter(Collider collision)
     {
         state_coll = true;
-        container = collision.gameObject;
-
+        
+        // 들고 있는 컨테이너가 없을 때만
+        if (lift_container == false)
+        {
+            container = collision.gameObject;
+        }
+        
         Debug.Log("Collision");
         Debug.Log(collision.gameObject.name);
     }
 
-    private void OnCollisionExit(Collision collision)
+    private void OnTriggerExit(Collider collision)
     {
         state_coll = false;
         Debug.Log("No Collision");

@@ -55,6 +55,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     public float[] arr_pos_row, arr_pos_bay;
     int num_bay, num_row, num_container;
     int random_value;
+    bool state_coll_old;
 
     // sensor data
     float[] arr_sensor_float;
@@ -254,6 +255,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         Debug.Log(spreader_down.transform.position.y);
 
         twist_lock = spreader_down.GetComponent<Twist_Lock_SPSS>();
+        state_coll_old = twist_lock.state_coll;
 
         pully_diameter = arr_pully[0].transform.localScale.x * 2.0f;
 
@@ -529,10 +531,12 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         sp_pos = spreader.transform.position;
 
         // collision
-        if (twist_lock.state_coll || rope_slack)
+        if ((twist_lock.state_coll != state_coll_old) || rope_slack)
         {
             sp_pos_y_imag -= del_pos;
-            Debug.Log(sp_pos.y - sp_pos_y_imag);
+
+            state_coll_old = twist_lock.state_coll;
+            //Debug.Log(sp_pos.y - sp_pos_y_imag);
         }
 
         // imag 값이 real 값보다 같거나 클 때만 update
