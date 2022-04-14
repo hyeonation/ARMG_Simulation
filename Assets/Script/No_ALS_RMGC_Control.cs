@@ -27,7 +27,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     // Twist lock
     int tw_lock;
     Twist_Lock_SPSS twist_lock;
-
+    
     // LiDAR
     LiDAR_distance[] arr_LiDAR;
     byte[] arr_bytes, arr_bytes_temp;
