@@ -19,6 +19,12 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     int DBnum_write, StartIdx_write, LenIdx_write;
     int startIdx;
 
+    //// cmd
+    // SPSS
+    bool cmd_tw_lock, fb_tw_lock;
+    bool fb_rope_slack;
+    bool cmd_SPSS, fb_SPSS_fb;
+
     // TL, TR, H
     float tl_vel, d_t, del_pos, tr_vel, H_vel;
     Vector3 tl_pos, tr_pos, H_scale;
@@ -335,57 +341,29 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     // Send data to PLC
     void Unity_to_PLC(){
 
-        // LiDAR data
-        int num_LiDAR = 0;
-        int i = 0;
-        foreach (LiDAR_distance LiDAR in arr_LiDAR)
+        //// SPSS
+        if (cmd_SPSS)
         {
-            arr_dist = LiDAR.arr_dist;
+            // bay, row index
+            int idx_bay = twist_lock.out_idx(arr_pos_bay, transform.position.z);
 
-            i = 0;
-            foreach (float dist in arr_dist)
+            // convert byte array
+            int i = 0;
+            float data = 0;
+            for (int j = 0; j < num_row; j++)
             {
-
-                arr_bytes_temp = System.BitConverter.GetBytes(dist);
+                data = (float)arr_num_container[idx_bay, j];
+                arr_bytes_temp = System.BitConverter.GetBytes(data);
                 System.Array.Reverse(arr_bytes_temp);
 
                 foreach (byte bb in arr_bytes_temp)
                 {
-                    arr_bytes[i] = bb;
+                    arr_sensor_bytes[i] = bb;
                     i += 1;
                 }
             }
-
-            plc.WriteBytes(DataType.DataBlock, (DBnum_write + num_LiDAR), StartIdx_write, arr_bytes);
-            num_LiDAR++;
+            plc.WriteBytes(DataType.DataBlock, DBnum_write, 70, arr_sensor_bytes);
         }
-
-        // sensor
-        arr_sensor_float[0] = tl_pos.z;     // Traveling sensor
-        arr_sensor_float[1] = tr_pos.x;     // Trolley sensor
-        arr_sensor_float[2] = arr_pully[0].transform.position.y - (spreader_up.transform.position.y + spreader_up.transform.localScale.y/2);    // hoist length
-
-        // Laser distance
-        for(int j=0; j<6; j++){
-            arr_sensor_float[j+3] = arr_Laser[j].distance;
-        }
-
-        // convert byte array
-        i = 0;
-        foreach (float data in arr_sensor_float)
-        {
-            arr_bytes_temp = System.BitConverter.GetBytes(data);
-            System.Array.Reverse(arr_bytes_temp);
-
-            foreach (byte bb in arr_bytes_temp)
-            {
-                arr_sensor_bytes[i] = bb;
-                i += 1;
-            }
-        }
-        
-        plc.WriteBytes(DataType.DataBlock, 250, 0, arr_sensor_bytes);
-
     }
 
     // Receive data from PLC
