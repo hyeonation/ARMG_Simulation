@@ -93,10 +93,10 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         Random.InitState(42);
 
         // local control
-        cmd_local_ctrl = true;
+        cmd_local_ctrl = false;
 
         // plc preset
-        ip = "192.168.0.212";
+        ip = "192.168.0.215";
         rack = 0;
         slot = 1;
 
@@ -107,7 +107,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
         DBnum_write = 202;
         StartIdx_write = 0;
-        LenIdx_write = 7200;
+        LenIdx_write = 106;
         num_bits_write = 8 * 10;
 
         // container variables
@@ -354,7 +354,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
         // byte array. start idx : 0
         bits_write.CopyTo(bytes_write, 0);
-        plc.WriteBytes(DataType.DataBlock, DBnum_write, 0, bytes_write);
+        //plc.WriteBytes(DataType.DataBlock, DBnum_write, 0, bytes_write);
 
         cmd_SPSS = true;
         //// SPSS
@@ -505,7 +505,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             motor.targetVelocity = H_vel;
             
             /*
-            // ¿ø·¡ ¼Óµµº¸´Ù ÃµÃµÈ÷ È¸Àü½ÃÄÑ¼­ rope slack È¿°ú ¾ø¾Ú
+            // ï¿½ï¿½ï¿½ï¿½ ï¿½Óµï¿½ï¿½ï¿½ï¿½ï¿½ ÃµÃµï¿½ï¿½ È¸ï¿½ï¿½ï¿½ï¿½ï¿½Ñ¼ï¿½ rope slack È¿ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             if (H_vel != 0)
             {
                 motor.targetVelocity = H_vel / Mathf.Abs(H_vel) * (Mathf.Abs(H_vel) - 2);     
@@ -532,8 +532,8 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             //Debug.Log(sp_pos.y - sp_pos_y_imag);
         }
 
-        // imag °ªÀÌ real °ªº¸´Ù °°°Å³ª Å¬ ¶§¸¸ update
-        // rope slack µ¿½Ã ±¸Çö
+        // imag ï¿½ï¿½ï¿½ï¿½ real ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Å³ï¿½ Å¬ ï¿½ï¿½ï¿½ï¿½ update
+        // rope slack ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         if (sp_pos.y <= sp_pos_y_imag)
         {
             sp_pos.y -= del_pos;
