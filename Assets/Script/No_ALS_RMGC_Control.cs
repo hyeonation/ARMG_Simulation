@@ -18,6 +18,9 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     int DBnum_read, StartIdx_read, LenIdx_read;
     int DBnum_write, StartIdx_write, LenIdx_write;
     int startIdx;
+    int num_bits_write;
+    BitArray bits_write;
+    byte[] bytes_write;
 
     //// cmd
     // SPSS
@@ -100,11 +103,12 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         // Comm data preset
         DBnum_read = 203;
         StartIdx_read = 0;
-        LenIdx_read = 6;
+        LenIdx_read = 38;
 
         DBnum_write = 202;
         StartIdx_write = 0;
         LenIdx_write = 7200;
+        num_bits_write = 8 * 10;
 
         // container variables
         interval_x = 0.5f;
@@ -136,6 +140,10 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             plc = new Plc(CpuType.S71500, ip, rack, slot);
             plc.Open();
         }
+
+        //// comm
+        bits_write = new BitArray(num_bits_write);
+        bytes_write = new byte[num_bits_write / 8];
 
         // load trolley instance
         trolley = GameObject.Find("Trolley");
@@ -341,6 +349,14 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     // Send data to PLC
     void Unity_to_PLC(){
 
+        // bitarray
+        bits_write[1] = true;
+
+        // byte array. start idx : 0
+        bits_write.CopyTo(bytes_write, 0);
+        plc.WriteBytes(DataType.DataBlock, DBnum_write, 0, bytes_write);
+
+        cmd_SPSS = true;
         //// SPSS
         if (cmd_SPSS)
         {
@@ -352,7 +368,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             float data = 0;
             for (int j = 0; j < num_row; j++)
             {
-                data = (float)arr_num_container[idx_bay, j];
+                data = (float)(arr_num_container[idx_bay, j]);
                 arr_bytes_temp = System.BitConverter.GetBytes(data);
                 System.Array.Reverse(arr_bytes_temp);
 
@@ -372,23 +388,22 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
         // Read data
         var data = plc.ReadBytes(DataType.DataBlock, DBnum_read, StartIdx_read, LenIdx_read);
-
+        var data_old = data;
+        
         // to convert big indian
         System.Array.Reverse(data);
-
+        
         //// refine data
+        // Traveling
+        startIdx = 10;
+        tl_vel = ((float)(System.BitConverter.ToDouble(data, startIdx)));
 
-        //// Traveling
-        startIdx = 4;
-        tl_vel = ((float)(System.BitConverter.ToInt16(data, startIdx)));
-
-        //// Trolling
-        startIdx = 2;
-        tr_vel = ((float)(System.BitConverter.ToInt16(data, startIdx)));
-
-        //// Hoist
-        startIdx = 0;
-        H_vel = ((float)(System.BitConverter.ToInt16(data, startIdx)));
+        // Monitoring
+        if (data_old != data)
+        {
+            Debug.Log(System.BitConverter.ToBoolean(data, 1));
+            Debug.Log(tl_vel);
+        }
         
     }
 
