@@ -96,7 +96,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         StartIdx_read = 0;
         LenIdx_read = 6;
 
-        DBnum_write = 204;
+        DBnum_write = 202;
         StartIdx_write = 0;
         LenIdx_write = 7200;
 
