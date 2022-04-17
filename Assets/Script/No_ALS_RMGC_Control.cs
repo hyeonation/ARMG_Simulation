@@ -93,7 +93,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         Random.InitState(42);
 
         // local control
-        cmd_local_ctrl = false;
+        cmd_local_ctrl = true;
 
         // plc preset
         ip = "192.168.0.215";

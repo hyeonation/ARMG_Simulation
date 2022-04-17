@@ -33,6 +33,9 @@ public class Twist_Lock_SPSS : MonoBehaviour
             // Trigger
             if ((tw_lock != tw_lock_old) && (tw_lock != 0))
             {
+                // update old value
+                tw_lock_old = tw_lock;
+
                 //// Motion
                 // Lock
                 if (tw_lock == -1)
@@ -93,9 +96,6 @@ public class Twist_Lock_SPSS : MonoBehaviour
                 }
             }
         }
-
-        // update old value
-        tw_lock_old = tw_lock;
     }
 
     private void OnTriggerEnter(Collider collision)
