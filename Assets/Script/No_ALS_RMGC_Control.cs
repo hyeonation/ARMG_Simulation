@@ -587,8 +587,6 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         tr_pos.x += del_pos;
         trolley.transform.position = tr_pos;    // update drawing
 
-
-
         //// Hoist
         foreach (GameObject pully in arr_pully)
         {
