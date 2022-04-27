@@ -16,11 +16,26 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
     // Communication
     int DBnum_read, StartIdx_read, LenIdx_read;
-    int DBnum_write, StartIdx_write, LenIdx_write;
+    int DBnum_write, LenIdx_write;
     int startIdx;
     int num_bits_write;
     BitArray bits_write;
     byte[] bytes_write;
+    int len_int = 2;
+    float conv_unit_m = 0.1f;
+
+    // PLC -> Unity
+    bool PtU_tw_lock, PtU_SPSS;
+    int PtU_TL_SS_vel, PtU_TL_LS_vel, PtU_TR_vel, PtU_H_vel;
+    int PtU_MM_pos_bay, PtU_MM_pos_row, PtU_MM_pos_CW;
+
+    // Unity -> PLC
+    bool UtP_tw_lock, UtP_SPSS, UtP_rope_slack;
+    int UtP_TL_SS_pos, UtP_TL_LS_pos, UtP_TR_pos, UtP_H_pos;
+    int UtP_sp_laser_1, UtP_sp_laser_2, UtP_sp_laser_3, UtP_sp_laser_4, UtP_sp_laser_5, UtP_sp_laser_6;
+    int UtP_RFID_SS_tag, UtP_RFID_SS_laser_front, UtP_RFID_SS_laser_rear;
+    int UtP_RFID_LS_tag, UtP_RFID_LS_laser_front, UtP_RFID_LS_laser_rear;
+    int[] UtP_SPSS_arr = new int[9];
 
     //// cmd
     // SPSS
@@ -81,6 +96,9 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     int idx_RFID;
     Laser_distance Laser_SS_Front, Laser_SS_Rear, Laser_LS_Front, Laser_LS_Rear;
 
+    // Micro motion
+    float MM_pos_bay, MM_pos_row, MM_pos_CW;
+
 
     // Start is called before the first frame update
     // Setting objects and init values
@@ -96,14 +114,14 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         cmd_local_ctrl = true;
 
         // plc preset
-        ip = "192.168.0.215";
+        ip = "192.168.100.10";
         rack = 0;
         slot = 1;
 
         // Comm data preset
         DBnum_read = 203;
         StartIdx_read = 0;
-        LenIdx_read = 38;
+        LenIdx_read = 24;
 
         DBnum_write = 202;
         StartIdx_write = 0;
@@ -388,23 +406,37 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
         // Read data
         var data = plc.ReadBytes(DataType.DataBlock, DBnum_read, StartIdx_read, LenIdx_read);
-        var data_old = data;
-        
+
+        // read bool data
+        PtU_tw_lock = System.BitConverter.ToBoolean(data, 0);
+        PtU_SPSS = System.BitConverter.ToBoolean(data, 2);
+
         // to convert big indian
         System.Array.Reverse(data);
         
-        //// refine data
-        // Traveling
+        // Read raw data
         startIdx = 10;
-        tl_vel = ((float)(System.BitConverter.ToDouble(data, startIdx)));
+        PtU_TL_SS_vel = System.BitConverter.ToInt16(data, LenIdx_read - (startIdx + len_int));
+        startIdx = 12;
+        PtU_TL_LS_vel = System.BitConverter.ToInt16(data, LenIdx_read - (startIdx + len_int));
+        startIdx = 14;
+        PtU_TR_vel = System.BitConverter.ToInt16(data, LenIdx_read - (startIdx + len_int));
+        startIdx = 16;
+        PtU_H_vel = System.BitConverter.ToInt16(data, LenIdx_read - (startIdx + len_int));
+        startIdx = 18;
+        PtU_MM_pos_bay = System.BitConverter.ToInt16(data, LenIdx_read - (startIdx + len_int));
+        startIdx = 20;
+        PtU_MM_pos_row = System.BitConverter.ToInt16(data, LenIdx_read - (startIdx + len_int));
+        startIdx = 22;
+        PtU_MM_pos_CW = System.BitConverter.ToInt16(data, LenIdx_read - (startIdx + len_int));
 
-        // Monitoring
-        if (data_old != data)
-        {
-            Debug.Log(System.BitConverter.ToBoolean(data, 1));
-            Debug.Log(tl_vel);
-        }
-        
+        // refine data
+        tl_vel = conv_unit_m * (float)(PtU_TL_SS_vel);
+        tr_vel = conv_unit_m * (float)(PtU_TR_vel);
+        H_vel = conv_unit_m * (float)(PtU_H_vel);
+        MM_pos_bay = conv_unit_m * (float)(PtU_MM_pos_bay);
+        MM_pos_row = conv_unit_m * (float)(PtU_MM_pos_row);
+        MM_pos_CW = conv_unit_m * (float)(PtU_MM_pos_CW);
     }
 
     void manual_ctrl()
