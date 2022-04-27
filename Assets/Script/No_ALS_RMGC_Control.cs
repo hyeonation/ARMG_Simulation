@@ -116,7 +116,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         Random.InitState(42);
 
         // local control
-        cmd_local_ctrl = true;
+        cmd_local_ctrl = false;
 
         // plc preset
         ip = "192.168.100.10";
@@ -577,7 +577,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         theta = tl_skew.y;
         skew_dev_LS = Mathf.Tan(theta * conv_deg_to_rad) * rail_width;
         skew_dev_LS += (tl_LS_vel - tl_SS_vel) * d_t;
-        tl_skew.y = Mathf.Atan(skew_dev_LS / rail_width);
+        tl_skew.y = Mathf.Atan(skew_dev_LS / rail_width) / conv_deg_to_rad;
         transform.localEulerAngles = tl_skew;
 
         //// Trolley
@@ -611,13 +611,13 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         }
 
         //// spreader position
-        del_pos = (H_vel / 360) * (pully_diameter * (Mathf.PI)) * d_t;
+        del_pos = H_vel * d_t;
         sp_pos = spreader.transform.position;
 
         // collision
         if ((twist_lock.state_coll != state_coll_old) || rope_slack)
         {
-            sp_pos_y_imag -= del_pos;
+            sp_pos_y_imag += del_pos;
 
             state_coll_old = twist_lock.state_coll;
             //Debug.Log(sp_pos.y - sp_pos_y_imag);
@@ -627,7 +627,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         // rope slack ���� ����
         if (sp_pos.y <= sp_pos_y_imag)
         {
-            sp_pos.y -= del_pos;
+            sp_pos.y += del_pos;
             spreader.transform.position = sp_pos;
 
             sp_pos_y_imag = sp_pos.y;
