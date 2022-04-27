@@ -377,7 +377,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         int[] arr_data = new int[15];
         arr_data[0] = UtP_TL_SS_pos;
         arr_data[1] = UtP_TL_LS_pos;
-        arr_data[2] = UtP_TR_pos;
+        arr_data[2] = (int)(tr_pos.x / conv_unit_m);
         arr_data[3] = UtP_H_pos;
         arr_data[4] = UtP_sp_laser_1;
         arr_data[5] = UtP_sp_laser_2;
