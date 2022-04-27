@@ -34,7 +34,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     int UtP_TL_SS_pos, UtP_TL_LS_pos, UtP_TR_pos, UtP_H_pos;
     int UtP_sp_laser_1, UtP_sp_laser_2, UtP_sp_laser_3, UtP_sp_laser_4, UtP_sp_laser_5, UtP_sp_laser_6;
     int UtP_RFID_SS_tag, UtP_RFID_SS_laser_front, UtP_RFID_SS_laser_rear;
-    int UtP_RFID_LS_tag, UtP_RFID_LS_laser_front, UtP_RFID_LS_laser_rear;
+    int UtP_RFID_LS_laser_front, UtP_RFID_LS_laser_rear;
     int[] UtP_SPSS_arr = new int[9];
 
     //// cmd
@@ -82,7 +82,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     bool state_coll_old;
 
     // sensor data
-    float[] arr_sensor_float;
+    int[] arr_sensor_int;
     byte[] arr_sensor_bytes;
     bool rope_slack;
 
@@ -124,8 +124,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         LenIdx_read = 24;
 
         DBnum_write = 202;
-        StartIdx_write = 0;
-        LenIdx_write = 106;
+        LenIdx_write = 50;
         num_bits_write = 8 * 10;
 
         // container variables
@@ -142,8 +141,8 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         num_bay = 9;
         num_row = 9;
 
-        arr_sensor_float = new float[10];
-        arr_sensor_bytes = new byte[arr_sensor_float.Length * 4];
+        arr_sensor_int = new int[10];
+        arr_sensor_bytes = new byte[arr_sensor_int.Length * 2];
 
         // RFID
         pos_RFID_init = new Vector3(16.62f, 0, 0);
@@ -161,7 +160,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
         //// comm
         bits_write = new BitArray(num_bits_write);
-        bytes_write = new byte[num_bits_write / 8];
+        bytes_write = new byte[LenIdx_write];
 
         // load trolley instance
         trolley = GameObject.Find("Trolley");
@@ -368,36 +367,75 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     void Unity_to_PLC(){
 
         // bitarray
-        bits_write[1] = true;
+        bits_write[0] = (tw_lock == -1);
+        bits_write[1] = rope_slack;
+        bits_write[2] = fb_SPSS_fb;
 
         // byte array. start idx : 0
         bits_write.CopyTo(bytes_write, 0);
-        //plc.WriteBytes(DataType.DataBlock, DBnum_write, 0, bytes_write);
 
-        cmd_SPSS = true;
-        //// SPSS
-        if (cmd_SPSS)
+        int[] arr_data = new int[15];
+        arr_data[0] = UtP_TL_SS_pos;
+        arr_data[1] = UtP_TL_LS_pos;
+        arr_data[2] = UtP_TR_pos;
+        arr_data[3] = UtP_H_pos;
+        arr_data[4] = UtP_sp_laser_1;
+        arr_data[5] = UtP_sp_laser_2;
+        arr_data[6] = UtP_sp_laser_3;
+        arr_data[7] = UtP_sp_laser_4;
+        arr_data[8] = UtP_sp_laser_5;
+        arr_data[9] = UtP_sp_laser_6;
+        arr_data[10] = UtP_RFID_SS_tag;
+        arr_data[11] = UtP_RFID_SS_laser_front;
+        arr_data[12] = UtP_RFID_SS_laser_rear;
+        arr_data[13] = UtP_RFID_LS_laser_front;
+        arr_data[14] = UtP_RFID_LS_laser_rear;
+        
+        int i = 10;
+        for(int j = 0; j < arr_data.Length; j++)
         {
+            arr_bytes_temp = System.BitConverter.GetBytes(arr_data[j]);
+            
+            // data reverse
+            bytes_write[i + 1] = arr_bytes_temp[0];
+            bytes_write[i] = arr_bytes_temp[1];
+
+            // update index
+            i = i + 2;
+        }
+
+        //// SPSS
+        if (PtU_SPSS)
+        {
+            fb_SPSS_fb = true;
             // bay, row index
             int idx_bay = twist_lock.out_idx(arr_pos_bay, transform.position.z);
 
             // convert byte array
-            int i = 0;
-            float data = 0;
+            int data = 0;
             for (int j = 0; j < num_row; j++)
             {
-                data = (float)(arr_num_container[idx_bay, j]);
+                data = arr_num_container[idx_bay, j];
                 arr_bytes_temp = System.BitConverter.GetBytes(data);
-                System.Array.Reverse(arr_bytes_temp);
 
-                foreach (byte bb in arr_bytes_temp)
-                {
-                    arr_sensor_bytes[i] = bb;
-                    i += 1;
-                }
+                // data reverse
+                bytes_write[i + 1] = arr_bytes_temp[0];
+                bytes_write[i] = arr_bytes_temp[1];
+
+                // update index
+                i = i + 2;
             }
-            plc.WriteBytes(DataType.DataBlock, DBnum_write, 70, arr_sensor_bytes);
+
+            // add
+            //System.Buffer.BlockCopy(arr_sensor_bytes, 0, bytes_write, 40, arr_sensor_bytes.Length);
         }
+        else
+        {
+            fb_SPSS_fb = false;
+        }
+
+        // write
+        plc.WriteBytes(DataType.DataBlock, DBnum_write, 0, bytes_write);
     }
 
     // Receive data from PLC
@@ -610,4 +648,13 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
     }
 
+
+    byte[] conv_int_to_Byte_arr(int data, byte[] bytes_write, int start_idx)
+    {
+        byte[] arr_bytes = System.BitConverter.GetBytes(data);
+        bytes_write[start_idx + 1] = arr_bytes[0];
+        bytes_write[start_idx] = arr_bytes[1];
+
+        return bytes_write;
+    }
 }
