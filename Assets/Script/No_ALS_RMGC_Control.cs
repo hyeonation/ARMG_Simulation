@@ -45,9 +45,11 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     bool cmd_SPSS, fb_SPSS_fb;
 
     // TL, TR, H
-    float tl_vel, d_t, del_pos, tr_vel, H_vel;
+    float tl_SS_vel, tl_LS_vel, d_t, del_pos, tr_vel, H_vel;
     Vector3 tl_pos, tr_pos, H_scale;
     GameObject trolley;
+    float theta, rail_width, skew_dev_LS;
+    Quaternion tl_skew;
 
     // Twist lock
     int tw_lock;
@@ -100,6 +102,8 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     // Micro motion
     float MM_pos_bay, MM_pos_row, MM_pos_CW;
 
+    // Constant
+    float conv_deg_to_rad = Mathf.PI / 180;
 
     // Start is called before the first frame update
     // Setting objects and init values
@@ -338,6 +342,10 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             Laser_LS_Front = GameObject.Find("RFID_Reader_LS").transform.Find("Laser_Front").gameObject.GetComponent<Laser_distance>();
             Laser_LS_Rear = GameObject.Find("RFID_Reader_LS").transform.Find("Laser_Rear").gameObject.GetComponent<Laser_distance>();
         }
+
+        GameObject rail_Left = GameObject.Find("Rail_Left");
+        GameObject rail_Right = GameObject.Find("Rail_Right");
+        rail_width = rail_Right.transform.position.x - rail_Left.transform.position.x;
     }
 
     // Update is called once per frame
@@ -472,7 +480,8 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         PtU_MM_pos_CW = System.BitConverter.ToInt16(data, LenIdx_read - (startIdx + len_int));
 
         // refine data
-        tl_vel = conv_unit_m * (float)(PtU_TL_SS_vel);
+        tl_SS_vel = conv_unit_m * (float)(PtU_TL_SS_vel);
+        tl_LS_vel = conv_unit_m * (float)(PtU_TL_LS_vel);
         tr_vel = conv_unit_m * (float)(PtU_TR_vel);
         H_vel = conv_unit_m * (float)(PtU_H_vel);
         MM_pos_bay = conv_unit_m * (float)(PtU_MM_pos_bay);
@@ -521,15 +530,18 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             // TL
             if (Input.GetKey(KeyCode.UpArrow))
             {
-                tl_vel = 1f;
+                tl_SS_vel = 1f;
+                tl_LS_vel = 1f;
             }
             else if (Input.GetKey(KeyCode.DownArrow))
             {
-                tl_vel = -1f;
+                tl_SS_vel = -1f;
+                tl_LS_vel = -1f;
             }
             else
             {
-                tl_vel = 0f;
+                tl_SS_vel = 0f;
+                tl_LS_vel = 0f;
             }
 
             // TR
@@ -556,9 +568,17 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         //// Traveling
         // shift position
         tl_pos = transform.position;
-        del_pos = tl_vel * d_t;
+        del_pos = (tl_SS_vel + tl_LS_vel) / 2 * d_t;
         tl_pos.z += del_pos;
         transform.position = tl_pos;    // update drawing
+
+        // skew
+        tl_skew = transform.rotation;
+        theta = tl_skew.y;
+        skew_dev_LS = Mathf.Tan(theta * conv_deg_to_rad) * rail_width;
+        skew_dev_LS += (tl_LS_vel - tl_SS_vel) * d_t;
+        tl_skew.y = Mathf.Atan(skew_dev_LS / rail_width);
+        transform.rotation = tl_skew;
 
         //// Trolley
         // shift position
@@ -651,13 +671,4 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
     }
 
-
-    byte[] conv_int_to_Byte_arr(int data, byte[] bytes_write, int start_idx)
-    {
-        byte[] arr_bytes = System.BitConverter.GetBytes(data);
-        bytes_write[start_idx + 1] = arr_bytes[0];
-        bytes_write[start_idx] = arr_bytes[1];
-
-        return bytes_write;
-    }
 }
