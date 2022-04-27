@@ -49,7 +49,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     Vector3 tl_pos, tr_pos, H_scale;
     GameObject trolley;
     float theta, rail_width, skew_dev_LS;
-    Quaternion tl_skew;
+    Vector3 tl_skew;
 
     // Twist lock
     int tw_lock;
@@ -480,13 +480,13 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         PtU_MM_pos_CW = System.BitConverter.ToInt16(data, LenIdx_read - (startIdx + len_int));
 
         // refine data
-        tl_SS_vel = conv_unit_m * (float)(PtU_TL_SS_vel);
-        tl_LS_vel = conv_unit_m * (float)(PtU_TL_LS_vel);
-        tr_vel = conv_unit_m * (float)(PtU_TR_vel);
-        H_vel = conv_unit_m * (float)(PtU_H_vel);
-        MM_pos_bay = conv_unit_m * (float)(PtU_MM_pos_bay);
-        MM_pos_row = conv_unit_m * (float)(PtU_MM_pos_row);
-        MM_pos_CW = conv_unit_m * (float)(PtU_MM_pos_CW);
+        tl_SS_vel = (float)(PtU_TL_SS_vel) / conv_unit_mm;
+        tl_LS_vel = (float)(PtU_TL_LS_vel) / conv_unit_mm;
+        tr_vel = (float)(PtU_TR_vel) / conv_unit_mm;
+        H_vel = (float)(PtU_H_vel) / conv_unit_mm;
+        MM_pos_bay = (float)(PtU_MM_pos_bay) / conv_unit_mm;
+        MM_pos_row = (float)(PtU_MM_pos_row) / conv_unit_mm;
+        MM_pos_CW = (float)(PtU_MM_pos_CW) / conv_unit_m;
     }
 
     void manual_ctrl()
@@ -573,12 +573,12 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         transform.position = tl_pos;    // update drawing
 
         // skew
-        tl_skew = transform.rotation;
+        tl_skew = transform.localEulerAngles;
         theta = tl_skew.y;
         skew_dev_LS = Mathf.Tan(theta * conv_deg_to_rad) * rail_width;
         skew_dev_LS += (tl_LS_vel - tl_SS_vel) * d_t;
         tl_skew.y = Mathf.Atan(skew_dev_LS / rail_width);
-        transform.rotation = tl_skew;
+        transform.localEulerAngles = tl_skew;
 
         //// Trolley
         // shift position
