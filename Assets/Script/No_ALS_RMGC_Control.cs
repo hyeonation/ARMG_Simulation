@@ -23,6 +23,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     byte[] bytes_write;
     int len_int = 2;
     float conv_unit_m = 0.1f;
+    float conv_unit_mm = 1000f;
 
     // PLC -> Unity
     bool PtU_tw_lock, PtU_SPSS;
@@ -181,8 +182,9 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         }
 
         // Laser instance
-        Laser_name = new string[] {"Laser_TL_Front", "Laser_TR_Front_L", "Laser_TR_Rear_L", 
-                                   "Laser_TL_Rear", "Laser_TR_Rear_R", "Laser_TR_Front_R"};
+        Laser_name = new string[] {"Laser_TL_Front", "Laser_TL_Rear", 
+                                   "Laser_TR_Front_L", "Laser_TR_Front_R",
+                                   "Laser_TR_Rear_L", "Laser_TR_Rear_R", };
         arr_Laser = new Laser_distance[6];
 
         i = 0;
@@ -378,19 +380,19 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         arr_data[0] = UtP_TL_SS_pos;
         arr_data[1] = UtP_TL_LS_pos;
         arr_data[2] = (int)(tr_pos.x / conv_unit_m);
-        arr_data[3] = UtP_H_pos;
-        arr_data[4] = UtP_sp_laser_1;
-        arr_data[5] = UtP_sp_laser_2;
-        arr_data[6] = UtP_sp_laser_3;
-        arr_data[7] = UtP_sp_laser_4;
-        arr_data[8] = UtP_sp_laser_5;
-        arr_data[9] = UtP_sp_laser_6;
-        arr_data[10] = UtP_RFID_SS_tag;
-        arr_data[11] = UtP_RFID_SS_laser_front;
-        arr_data[12] = UtP_RFID_SS_laser_rear;
-        arr_data[13] = UtP_RFID_LS_laser_front;
-        arr_data[14] = UtP_RFID_LS_laser_rear;
-        
+        arr_data[3] = (int)((spreader_down.transform.position.y - spreader_down.transform.localScale.y/2) / conv_unit_m);
+        arr_data[4] = (int)(arr_Laser[0].distance / conv_unit_m);
+        arr_data[5] = (int)(arr_Laser[1].distance / conv_unit_m);
+        arr_data[6] = (int)(arr_Laser[2].distance / conv_unit_m);
+        arr_data[7] = (int)(arr_Laser[3].distance / conv_unit_m);
+        arr_data[8] = (int)(arr_Laser[4].distance / conv_unit_m);
+        arr_data[9] = (int)(arr_Laser[5].distance / conv_unit_m);
+        arr_data[10] = (int)(val_RFID_tag / conv_unit_m);
+        arr_data[11] = (int)(Laser_SS_Front.distance / conv_unit_m);
+        arr_data[12] = (int)(Laser_SS_Rear.distance / conv_unit_m);
+        arr_data[13] = (int)(Laser_LS_Front.distance / conv_unit_m);
+        arr_data[14] = (int)(Laser_LS_Rear.distance / conv_unit_m);
+
         int i = 10;
         for(int j = 0; j < arr_data.Length; j++)
         {
@@ -479,8 +481,8 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
     void manual_ctrl()
     {
-
         // Hoist, Twist lock
+
         if (Input.GetKey(KeyCode.LeftShift))
         {
             // Hoist
