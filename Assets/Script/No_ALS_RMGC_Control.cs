@@ -90,7 +90,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     // RFID
     public GameObject RFID_Tag, TL_Calib_Target;
     GameObject[] arr_RFID_Tag, arr_TL_Calib_Target;
-    GameObject RFID_SS;
+    GameObject RFID_SS, RFID_LS;
     Vector3 pos_RFID_init, pos_RFID_tmp;
     float val_RFID_tag, range_recogn_RFID, dist_to_RFID_Tag;
     bool active_RFID;
@@ -227,7 +227,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             // set parent
             arr_container[j].transform.SetParent(GameObject.Find("Container").transform);
         }
-
+        
         // Make bay, row position
         arr_pos_bay = new float[num_bay + 1];
         arr_pos_row = new float[num_row + 1];
@@ -330,6 +330,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
             // sea side RFID object
             RFID_SS = GameObject.Find("RFID_Reader_SS");
+            RFID_LS = GameObject.Find("RFID_Reader_LS");
 
             // RFID Laser
             Laser_SS_Front = GameObject.Find("RFID_Reader_SS").transform.Find("Laser_Front").gameObject.GetComponent<Laser_distance>();
@@ -377,8 +378,8 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         bits_write.CopyTo(bytes_write, 0);
 
         int[] arr_data = new int[15];
-        arr_data[0] = UtP_TL_SS_pos;
-        arr_data[1] = UtP_TL_LS_pos;
+        arr_data[0] = (int)(RFID_SS.transform.position.z / conv_unit_m);
+        arr_data[1] = (int)(RFID_LS.transform.position.z / conv_unit_m);
         arr_data[2] = (int)(tr_pos.x / conv_unit_m);
         arr_data[3] = (int)((spreader_down.transform.position.y - spreader_down.transform.localScale.y/2) / conv_unit_m);
         arr_data[4] = (int)(arr_Laser[0].distance / conv_unit_m);
