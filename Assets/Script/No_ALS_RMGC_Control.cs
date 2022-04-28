@@ -318,7 +318,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
             // set position
             pos_RFID_tmp = -pos_RFID_init;
-            pos_RFID_tmp.z = arr_pos_bay[(int)(j / 2)] + (pos_container_size.z / 2) * ((j % 2) + 1);
+            pos_RFID_tmp.z = ((interval_z + pos_container_size.z) / 2) * j;
             arr_TL_Calib_Target[j].transform.position = pos_RFID_tmp;
 
             //// RFID Tag
@@ -332,8 +332,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             arr_RFID_Tag[j].transform.SetParent(GameObject.Find("RFID_Tag").transform);
 
             // set position
-            pos_RFID_tmp = 1*pos_RFID_init;
-            pos_RFID_tmp.z = arr_pos_bay[(int)(j/2)] + (pos_container_size.z / 2) * ((j%2)+1);
+            pos_RFID_tmp.x = pos_RFID_init.x;
             arr_RFID_Tag[j].transform.position = pos_RFID_tmp;
 
             // sea side RFID object
@@ -400,7 +399,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         arr_data[8] = (int)(arr_Laser[3].distance / conv_unit_m);
         arr_data[9] = (int)(arr_Laser[4].distance / conv_unit_m);
         arr_data[10] = (int)(arr_Laser[5].distance / conv_unit_m);
-        arr_data[11] = (int)(val_RFID_tag / conv_unit_m);
+        arr_data[11] = (int)(val_RFID_tag);
         arr_data[12] = (int)(Laser_SS_Front.distance / conv_unit_m);
         arr_data[13] = (int)(Laser_SS_Rear.distance / conv_unit_m);
         arr_data[14] = (int)(Laser_LS_Front.distance / conv_unit_m);
@@ -670,12 +669,13 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         idx_RFID = twist_lock.out_idx(arr_pos_bay, tl_pos.z);
         if (idx_RFID != -1)
         {
+            Debug.Log(idx_RFID + 1);
             pos_RFID_tmp = GameObject.Find("RFID_Tag" + System.Convert.ToString(idx_RFID + 1)).transform.position;
             dist_to_RFID_Tag = (RFID_SS.transform.position - pos_RFID_tmp).magnitude;
             
             if (dist_to_RFID_Tag < range_recogn_RFID)
             {
-                val_RFID_tag = pos_RFID_tmp.z;
+                val_RFID_tag = (idx_RFID + 1)*10;
                 active_RFID = true;
             }
 
