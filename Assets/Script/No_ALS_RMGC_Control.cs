@@ -623,7 +623,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
         //// spreader position
         del_pos = H_vel * d_t;
-        sp_pos = spreader.transform.position;
+        sp_pos = spreader.transform.localPosition;
 
         // collision
         if ((twist_lock.state_coll != state_coll_old) || rope_slack)
@@ -655,7 +655,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         sp_rot.y = MM_pos_CW;
 
         // apply spreader position
-        spreader.transform.position = sp_pos;
+        spreader.transform.localPosition = sp_pos;
         spreader.transform.localEulerAngles = sp_rot;
 
         //// Twist lock
