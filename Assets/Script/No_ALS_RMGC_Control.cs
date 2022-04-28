@@ -360,17 +360,20 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         GameObject rail_Right = GameObject.Find("Rail_Right");
         rail_width = rail_Right.transform.position.x - rail_Left.transform.position.x;
 
-        // init RMGC position
+        //// init RMGC position
+        // TL
         pos_init_RMGC = transform.position;
-        pos_init_Trolley = trolley.transform.position;
-        pos_init_spreader = spreader.transform.position;
-        
         pos_init_RMGC.z = pos_init_TL;
-        pos_init_Trolley.x = pos_init_TR;
-        pos_init_spreader.y = pos_init_Hoist - (spreader_down.transform.position.y - spreader_down.transform.localScale.y / 2);
-
         transform.position = pos_init_RMGC;
+
+        // TR
+        pos_init_Trolley = trolley.transform.position;
+        pos_init_Trolley.x = pos_init_TR;
         trolley.transform.position = pos_init_Trolley;
+
+        // Hoist
+        pos_init_spreader = spreader.transform.position;
+        pos_init_spreader.y = pos_init_Hoist - (spreader_down.transform.position.y - spreader_down.transform.localScale.y / 2);
         spreader.transform.position = pos_init_spreader;
     }
 
