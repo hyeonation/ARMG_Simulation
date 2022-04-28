@@ -310,7 +310,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
         //// RFID
         // Make instance
-        num_RFID = num_bay * 2;
+        num_RFID = num_bay * 4;
         arr_TL_Calib_Target = new GameObject[num_RFID];
         arr_RFID_Tag = new GameObject[num_RFID];
         for (int j = 0; j < num_RFID; j++)
@@ -327,7 +327,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
             // set position
             pos_RFID_tmp = -pos_RFID_init;
-            pos_RFID_tmp.z = ((interval_z + pos_container_size.z) / 2) * j;
+            pos_RFID_tmp.z = ((interval_z + pos_container_size.z/2) / 2) * j;
             arr_TL_Calib_Target[j].transform.position = pos_RFID_tmp;
 
             //// RFID Tag
