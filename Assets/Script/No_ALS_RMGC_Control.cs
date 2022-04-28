@@ -666,30 +666,23 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
     void RFID()
     {
-        idx_RFID = twist_lock.out_idx(arr_pos_bay, tl_pos.z);
-        if (idx_RFID != -1)
-        {
-            Debug.Log(idx_RFID + 1);
-            pos_RFID_tmp = GameObject.Find("RFID_Tag" + System.Convert.ToString(idx_RFID + 1)).transform.position;
+        
+        for(int i = 0; i < arr_RFID_Tag.Length; i++){
+            
+            pos_RFID_tmp = arr_RFID_Tag[i].transform.position;
             dist_to_RFID_Tag = (RFID_SS.transform.position - pos_RFID_tmp).magnitude;
             
+            // check recognizing range
             if (dist_to_RFID_Tag < range_recogn_RFID)
             {
-                val_RFID_tag = (idx_RFID + 1)*10;
+                val_RFID_tag = (i + 1) * 10;
                 active_RFID = true;
+                break;
             }
-
             else
             {
                 active_RFID = false;
             }
         }
-
-        else
-        {
-            active_RFID = false;
-        }
-
     }
-
 }
