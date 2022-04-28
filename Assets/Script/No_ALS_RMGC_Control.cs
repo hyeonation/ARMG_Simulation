@@ -161,7 +161,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
         // RFID
         pos_RFID_init = new Vector3(16.62f, 0, 0);
-        range_recogn_RFID = 3.0f;   // [m], radius
+        range_recogn_RFID = 0.5f;   // [m], radius
 
         //////////////////////////////////////////////////// Preset
 
