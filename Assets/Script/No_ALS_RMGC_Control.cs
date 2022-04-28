@@ -26,8 +26,8 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     float conv_unit_mm = 1000f;
 
     // PLC -> Unity
-    bool PtU_tw_lock, PtU_SPSS;
-    int PtU_TL_SS_vel, PtU_TL_LS_vel, PtU_TR_vel, PtU_H_vel;
+    bool PtU_SPSS;
+    int PtU_TL_SS_vel, PtU_TL_LS_vel, PtU_TR_vel, PtU_H_vel, PtU_tw_lock;
     int PtU_MM_pos_bay, PtU_MM_pos_row, PtU_MM_pos_CW;
 
     // Unity -> PLC
@@ -40,7 +40,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
     //// cmd
     // SPSS
-    bool cmd_tw_lock, fb_tw_lock;
+    bool fb_tw_lock;
     bool fb_rope_slack;
     bool cmd_SPSS, fb_SPSS_fb;
 
@@ -126,10 +126,10 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         // Comm data preset
         DBnum_read = 203;
         StartIdx_read = 0;
-        LenIdx_read = 24;
+        LenIdx_read = 26;
 
         DBnum_write = 202;
-        LenIdx_write = 50;
+        LenIdx_write = 60;
         num_bits_write = 8 * 10;
 
         // container variables
@@ -295,6 +295,8 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         state_coll_old = twist_lock.state_coll;
 
         pully_diameter = arr_pully[0].transform.localScale.x * 2.0f;
+        tw_lock = 0;
+        rope_slack = false;
 
         //// RFID
         // Make instance
@@ -376,31 +378,31 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
     // Send data to PLC
     void Unity_to_PLC(){
-
+        
         // bitarray
-        bits_write[0] = (tw_lock == -1);
         bits_write[1] = rope_slack;
         bits_write[2] = fb_SPSS_fb;
 
         // byte array. start idx : 0
         bits_write.CopyTo(bytes_write, 0);
 
-        int[] arr_data = new int[15];
+        int[] arr_data = new int[16];
         arr_data[0] = (int)(RFID_SS.transform.position.z / conv_unit_m);
         arr_data[1] = (int)(RFID_LS.transform.position.z / conv_unit_m);
         arr_data[2] = (int)(tr_pos.x / conv_unit_m);
         arr_data[3] = (int)((spreader_down.transform.position.y - spreader_down.transform.localScale.y/2) / conv_unit_m);
-        arr_data[4] = (int)(arr_Laser[0].distance / conv_unit_m);
-        arr_data[5] = (int)(arr_Laser[1].distance / conv_unit_m);
-        arr_data[6] = (int)(arr_Laser[2].distance / conv_unit_m);
-        arr_data[7] = (int)(arr_Laser[3].distance / conv_unit_m);
-        arr_data[8] = (int)(arr_Laser[4].distance / conv_unit_m);
-        arr_data[9] = (int)(arr_Laser[5].distance / conv_unit_m);
-        arr_data[10] = (int)(val_RFID_tag / conv_unit_m);
-        arr_data[11] = (int)(Laser_SS_Front.distance / conv_unit_m);
-        arr_data[12] = (int)(Laser_SS_Rear.distance / conv_unit_m);
-        arr_data[13] = (int)(Laser_LS_Front.distance / conv_unit_m);
-        arr_data[14] = (int)(Laser_LS_Rear.distance / conv_unit_m);
+        arr_data[4] = twist_lock.tw_lock_fb;
+        arr_data[5] = (int)(arr_Laser[0].distance / conv_unit_m);
+        arr_data[6] = (int)(arr_Laser[1].distance / conv_unit_m);
+        arr_data[7] = (int)(arr_Laser[2].distance / conv_unit_m);
+        arr_data[8] = (int)(arr_Laser[3].distance / conv_unit_m);
+        arr_data[9] = (int)(arr_Laser[4].distance / conv_unit_m);
+        arr_data[10] = (int)(arr_Laser[5].distance / conv_unit_m);
+        arr_data[11] = (int)(val_RFID_tag / conv_unit_m);
+        arr_data[12] = (int)(Laser_SS_Front.distance / conv_unit_m);
+        arr_data[13] = (int)(Laser_SS_Rear.distance / conv_unit_m);
+        arr_data[14] = (int)(Laser_LS_Front.distance / conv_unit_m);
+        arr_data[15] = (int)(Laser_LS_Rear.distance / conv_unit_m);
 
         int i = 10;
         for(int j = 0; j < arr_data.Length; j++)
@@ -457,7 +459,6 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         var data = plc.ReadBytes(DataType.DataBlock, DBnum_read, StartIdx_read, LenIdx_read);
 
         // read bool data
-        PtU_tw_lock = System.BitConverter.ToBoolean(data, 0);
         PtU_SPSS = System.BitConverter.ToBoolean(data, 2);
 
         // to convert big indian
@@ -473,10 +474,12 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         startIdx = 16;
         PtU_H_vel = System.BitConverter.ToInt16(data, LenIdx_read - (startIdx + len_int));
         startIdx = 18;
-        PtU_MM_pos_bay = System.BitConverter.ToInt16(data, LenIdx_read - (startIdx + len_int));
+        PtU_tw_lock = System.BitConverter.ToInt16(data, LenIdx_read - (startIdx + len_int));
         startIdx = 20;
-        PtU_MM_pos_row = System.BitConverter.ToInt16(data, LenIdx_read - (startIdx + len_int));
+        PtU_MM_pos_bay = System.BitConverter.ToInt16(data, LenIdx_read - (startIdx + len_int));
         startIdx = 22;
+        PtU_MM_pos_row = System.BitConverter.ToInt16(data, LenIdx_read - (startIdx + len_int));
+        startIdx = 24;
         PtU_MM_pos_CW = System.BitConverter.ToInt16(data, LenIdx_read - (startIdx + len_int));
 
         // refine data
@@ -484,6 +487,8 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         tl_LS_vel = (float)(PtU_TL_LS_vel) / conv_unit_mm;
         tr_vel = (float)(PtU_TR_vel) / conv_unit_mm;
         H_vel = (float)(PtU_H_vel) / conv_unit_mm;
+        tw_lock = PtU_tw_lock;
+
         MM_pos_bay = (float)(PtU_MM_pos_bay) / conv_unit_mm;
         MM_pos_row = (float)(PtU_MM_pos_row) / conv_unit_mm;
         MM_pos_CW = (float)(PtU_MM_pos_CW) / conv_unit_m;

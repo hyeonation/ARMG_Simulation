@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class Twist_Lock_SPSS : MonoBehaviour
 {
-    public int tw_lock;
+    public int tw_lock, tw_lock_fb;
     int tw_lock_old;
     FixedJoint fixedJoint;
     public bool state_coll;
@@ -22,6 +22,7 @@ public class Twist_Lock_SPSS : MonoBehaviour
         RMGC = GameObject.Find("RMGC").GetComponent<No_ALS_RMGC_Control>();
 
         lift_container = false;
+        tw_lock_fb = 1;
     }
 
     // Update is called once per frame
@@ -43,6 +44,7 @@ public class Twist_Lock_SPSS : MonoBehaviour
                     Debug.Log("Lock");
                     container.transform.SetParent(transform);
                     lift_container = true;
+                    tw_lock_fb = -1;
 
                     /*
                     gameObject.AddComponent<FixedJoint>();
@@ -57,6 +59,7 @@ public class Twist_Lock_SPSS : MonoBehaviour
                     Debug.Log("Unlock");
                     container.transform.SetParent(GameObject.Find("Container").transform);
                     lift_container = false;
+                    tw_lock_fb = 1;
 
                     //Destroy(fixedJoint);
                 }
@@ -69,7 +72,7 @@ public class Twist_Lock_SPSS : MonoBehaviour
                 idx_bay = out_idx(RMGC.arr_pos_bay, pos_container.z);
                 idx_row = out_idx(RMGC.arr_pos_row, pos_container.x);
 
-                // ¹üÀ§ ¾È¿¡ ÀÖÀ» ¶§¸¸ SPSS update
+                // ï¿½ï¿½ï¿½ï¿½ ï¿½È¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ SPSS update
                 if ((idx_bay != -1) && (idx_row != -1))
                 {
                     RMGC.arr_num_container[idx_bay, idx_row] += tw_lock;
@@ -81,7 +84,7 @@ public class Twist_Lock_SPSS : MonoBehaviour
 
                 if (idx_bay != -1)
                 {
-                    // ¹è¿­ Ãâ·Â
+                    // ï¿½è¿­ ï¿½ï¿½ï¿½
                     string confirm_arr = "Stack: ";
                     int count;
 
@@ -102,7 +105,7 @@ public class Twist_Lock_SPSS : MonoBehaviour
     {
         state_coll = true;
         
-        // µé°í ÀÖ´Â ÄÁÅ×ÀÌ³Ê°¡ ¾øÀ» ¶§¸¸
+        // ï¿½ï¿½ï¿½ ï¿½Ö´ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½Ì³Ê°ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
         if (lift_container == false)
         {
             container = collision.gameObject;
@@ -132,7 +135,7 @@ public class Twist_Lock_SPSS : MonoBehaviour
             }
         }
 
-        // ¾çÂÊÀ¸·Î ¹þ¾î³ª´Â °æ¿ì´Â -1 Ãâ·Â
+        // ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½î³ªï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ -1 ï¿½ï¿½ï¿½
         return idx;
     }
 }
