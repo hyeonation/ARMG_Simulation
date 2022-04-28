@@ -287,9 +287,9 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         spreader_down = GameObject.Find("Spreader_down");
         spreader = GameObject.Find("Spreader");
 
-        Debug.Log(arr_pully[0].transform.position.y);
-        Debug.Log(spreader_up.transform.position.y);
-        Debug.Log(spreader_down.transform.position.y);
+        //Debug.Log(arr_pully[0].transform.position.y);
+        //Debug.Log(spreader_up.transform.position.y);
+        //Debug.Log(spreader_down.transform.position.y);
 
         twist_lock = spreader_down.GetComponent<Twist_Lock_SPSS>();
         state_coll_old = twist_lock.state_coll;
@@ -418,7 +418,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         }
 
         //// SPSS
-        if (PtU_SPSS)
+        if (cmd_SPSS)
         {
             fb_SPSS_fb = true;
             // bay, row index
@@ -459,7 +459,13 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         var data = plc.ReadBytes(DataType.DataBlock, DBnum_read, StartIdx_read, LenIdx_read);
 
         // read bool data
-        PtU_SPSS = System.BitConverter.ToBoolean(data, 2);
+        byte[] byte_temp = new byte[2];
+        byte_temp[0] = data[0];
+        byte_temp[1] = data[1];
+        BitArray bools = new BitArray(byte_temp);
+        
+        PtU_SPSS = bools[2];
+        cmd_SPSS = PtU_SPSS;        
 
         // to convert big indian
         System.Array.Reverse(data);
@@ -503,11 +509,11 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             // Hoist
             if (Input.GetKey(KeyCode.UpArrow))
             {
-                H_vel = 150f;
+                H_vel = 1000f;
             }
             else if (Input.GetKey(KeyCode.DownArrow))
             {
-                H_vel = -150f;
+                H_vel = -1000f;
             }
             else
             {
