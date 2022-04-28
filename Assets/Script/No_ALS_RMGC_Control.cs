@@ -98,6 +98,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     bool active_RFID;
     int idx_RFID;
     Laser_distance Laser_SS_Front, Laser_SS_Rear, Laser_LS_Front, Laser_LS_Rear;
+    int num_RFID;
 
     // Micro motion
     float MM_pos_bay, MM_pos_row, MM_pos_CW;
@@ -134,16 +135,16 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
         // container variables
         interval_x = 0.5f;
-        interval_z = 0.5f;
-        err_rotate = 0.2f;
-        err_shift = 0.2f;
+        interval_z = 0.4f;
+        err_rotate = 0f;
+        err_shift = 0f;
 
         pos_container_size = Container_red.transform.localScale;
         pos_container_init = new Vector3(-12.075f, 1.2f, 0.0f);
         pos_container_init.y = pos_container_size.y / 2.0f;
         rotate_container_tmp = new Vector3(0, 0, 0);
 
-        num_bay = 9;
+        num_bay = 19;
         num_row = 9;
 
         arr_sensor_int = new int[10];
@@ -300,9 +301,10 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
         //// RFID
         // Make instance
-        arr_TL_Calib_Target = new GameObject[num_bay];
-        arr_RFID_Tag = new GameObject[num_bay];
-        for (int j = 0; j < num_bay; j++)
+        num_RFID = num_bay * 2;
+        arr_TL_Calib_Target = new GameObject[num_RFID];
+        arr_RFID_Tag = new GameObject[num_RFID];
+        for (int j = 0; j < num_RFID; j++)
         {
             //// TL_Calib_Target
             // Make instance
@@ -316,7 +318,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
             // set position
             pos_RFID_tmp = -pos_RFID_init;
-            pos_RFID_tmp.z = arr_pos_bay[j] + (pos_container_size.z / 2);
+            pos_RFID_tmp.z = arr_pos_bay[(int)(j / 2)] + (pos_container_size.z / 2) * ((j % 2) + 1);
             arr_TL_Calib_Target[j].transform.position = pos_RFID_tmp;
 
             //// RFID Tag
@@ -331,7 +333,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
             // set position
             pos_RFID_tmp = 1*pos_RFID_init;
-            pos_RFID_tmp.z = arr_pos_bay[j] + (pos_container_size.z / 2);
+            pos_RFID_tmp.z = arr_pos_bay[(int)(j/2)] + (pos_container_size.z / 2) * ((j%2)+1);
             arr_RFID_Tag[j].transform.position = pos_RFID_tmp;
 
             // sea side RFID object
