@@ -38,6 +38,10 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     int UtP_RFID_LS_laser_front, UtP_RFID_LS_laser_rear;
     int[] UtP_SPSS_arr = new int[9];
 
+    // init RMGC position
+    Vector3 pos_init_RMGC, pos_init_Trolley, pos_init_spreader;
+    float pos_init_TL, pos_init_TR, pos_init_Hoist;
+
     //// cmd
     // SPSS
     bool fb_tw_lock;
@@ -118,6 +122,11 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
         // local control
         cmd_local_ctrl = false;
+
+        // init RMGC position
+        pos_init_TL = 6.0f;
+        pos_init_TR = -10.0f;
+        pos_init_Hoist = 21.6f;
 
         // plc preset
         ip = "192.168.100.10";
@@ -346,9 +355,23 @@ public class No_ALS_RMGC_Control : MonoBehaviour
             Laser_LS_Rear = GameObject.Find("RFID_Reader_LS").transform.Find("Laser_Rear").gameObject.GetComponent<Laser_distance>();
         }
 
+        // rail width
         GameObject rail_Left = GameObject.Find("Rail_Left");
         GameObject rail_Right = GameObject.Find("Rail_Right");
         rail_width = rail_Right.transform.position.x - rail_Left.transform.position.x;
+
+        // init RMGC position
+        pos_init_RMGC = transform.position;
+        pos_init_Trolley = trolley.transform.position;
+        pos_init_spreader = spreader.transform.position;
+        
+        pos_init_RMGC.z = pos_init_TL;
+        pos_init_Trolley.x = pos_init_TR;
+        pos_init_spreader.y = pos_init_Hoist - (spreader_down.transform.position.y - spreader_down.transform.localScale.y / 2);
+
+        transform.position = pos_init_RMGC;
+        trolley.transform.position = pos_init_Trolley;
+        spreader.transform.position = pos_init_spreader;
     }
 
     // Update is called once per frame
