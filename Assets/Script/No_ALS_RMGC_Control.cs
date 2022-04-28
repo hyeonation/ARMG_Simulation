@@ -42,7 +42,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     // SPSS
     bool fb_tw_lock;
     bool fb_rope_slack;
-    bool cmd_SPSS, fb_SPSS_fb;
+    bool cmd_SPSS, fb_SPSS;
 
     // TL, TR, H
     float tl_SS_vel, tl_LS_vel, d_t, del_pos, tr_vel, H_vel;
@@ -70,7 +70,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     string[] pully_name;
     HingeJoint hinge;
     GameObject spreader_up, spreader_down, spreader;
-    Vector3 sp_pos;
+    Vector3 sp_pos, sp_rot;
     float sp_pos_y_imag, pully_diameter;
 
     // Container
@@ -381,7 +381,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         
         // bitarray
         bits_write[1] = rope_slack;
-        bits_write[2] = fb_SPSS_fb;
+        bits_write[2] = fb_SPSS;
 
         // byte array. start idx : 0
         bits_write.CopyTo(bytes_write, 0);
@@ -420,7 +420,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         //// SPSS
         if (cmd_SPSS)
         {
-            fb_SPSS_fb = true;
+            fb_SPSS = true;
             // bay, row index
             int idx_bay = twist_lock.out_idx(arr_pos_bay, transform.position.z);
 
@@ -444,7 +444,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         }
         else
         {
-            fb_SPSS_fb = false;
+            fb_SPSS = false;
         }
 
         // write
@@ -497,7 +497,7 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
         MM_pos_bay = (float)(PtU_MM_pos_bay) / conv_unit_mm;
         MM_pos_row = (float)(PtU_MM_pos_row) / conv_unit_mm;
-        MM_pos_CW = (float)(PtU_MM_pos_CW) / conv_unit_m;
+        MM_pos_CW = (float)(PtU_MM_pos_CW) * 0.1f;      // 0.1 deg
     }
 
     void manual_ctrl()
@@ -639,7 +639,6 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         if (sp_pos.y <= sp_pos_y_imag)
         {
             sp_pos.y += del_pos;
-            spreader.transform.position = sp_pos;
 
             sp_pos_y_imag = sp_pos.y;
             rope_slack = false;
@@ -648,9 +647,20 @@ public class No_ALS_RMGC_Control : MonoBehaviour
         {
             rope_slack = true;
         }
-        
+
+        // Micro motion
+        sp_pos.x = MM_pos_row;
+        sp_pos.z = MM_pos_bay;
+        sp_rot = spreader.transform.localEulerAngles;
+        sp_rot.y = MM_pos_CW;
+
+        // apply spreader position
+        spreader.transform.position = sp_pos;
+        spreader.transform.localEulerAngles = sp_rot;
+
         //// Twist lock
         twist_lock.tw_lock = tw_lock;
+
     }
 
     void RFID()
