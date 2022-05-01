@@ -89,8 +89,6 @@ public class No_ALS_RMGC_Control : MonoBehaviour
     bool state_coll_old;
 
     // sensor data
-    int[] arr_sensor_int;
-    byte[] arr_sensor_bytes;
     bool rope_slack;
 
     // RFID
@@ -155,9 +153,6 @@ public class No_ALS_RMGC_Control : MonoBehaviour
 
         num_bay = 19;
         num_row = 9;
-
-        arr_sensor_int = new int[10];
-        arr_sensor_bytes = new byte[arr_sensor_int.Length * 2];
 
         // RFID
         pos_RFID_init = new Vector3(16.62f, 0, 0);
